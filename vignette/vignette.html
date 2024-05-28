@@ -60,27 +60,67 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<div class="cell">
+
+</div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Para 1 - Automated testing is important for large scale data handling of observations.</p>
+<p>Para 1 - Automated testing is important for large scale data handling of observations and analysis of extreme events.</p>
 <p>Para 2 - There are a suite of tests of available for quality assurance.</p>
-<p>Para 3 - These do not necessarily guarantee the quality of the extreme observations. Known issues persist in this data.</p>
-<p>Para 4 - Here we provide methods and examples showing how to better assess the quality of the extremal observations.</p>
+<p>Para 3 - These do not necessarily guarantee the quality of the extreme observations. Known issues persist in this data that impact the analysis of extremes.</p>
+<p>Para 4 - Here we provide methods and examples showing how to better assess the quality of the extreme rainfall observations.</p>
 </section>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <ul>
-<li>GHCNDaily data</li>
-<li>Variables</li>
-<li>Flags</li>
-<li>rnoaa download</li>
+<li><p>Write about GHCNDaily data</p></li>
+<li><p>Write about rainfall variables - see readme https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt</p></li>
+</ul>
+<p>PRCP = Precipitation (tenths of mm)</p>
+<p>MDPR = Multiday precipitation total (tenths of mm; use with DAPR and DWPR, if available)</p>
+<p>DAPR = Number of days included in the multiday precipiation total (MDPR)</p>
+<p>DWPR = Number of days with non-zero precipitation included in multiday precipitation total (MDPR)</p>
+<p>MDPR = Multiday precipitation total (tenths of mm; use with DAPR and DWPR, if available)</p>
+<ul>
+<li>Flags associated wtih automatic testing</li>
+</ul>
+<p>QFLAG1 is the quality flag for the first day of the month. There are fourteen possible values:</p>
+<pre><code>       Blank = did not fail any quality assurance check
+       D     = failed duplicate check
+       G     = failed gap check
+       I     = failed internal consistency check
+       K     = failed streak/frequent-value check
+         L     = failed check on length of multiday period 
+       M     = failed megaconsistency check
+       N     = failed naught check
+       O     = failed climatological outlier check
+       R     = failed lagged range check
+       S     = failed spatial consistency check
+       T     = failed temporal consistency check
+       W     = temperature too warm for snow
+       X     = failed bounds check
+   Z     = flagged as a result of an official Datzilla 
+           investigation</code></pre>
+<ul>
+<li>Where and how to download the data (rnoaa)</li>
 </ul>
 <section id="visualisation" class="level3">
 <h3 class="anchored" data-anchor-id="visualisation">Visualisation</h3>
-<ul>
-<li>1974 example</li>
-<li>Highlight bad observations</li>
-</ul>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="vignette_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Caption: Daily rainfall observations in Brisbane, Australia. Solid circles are coloured by the measured precipitation. Empty circles show zero observations.A grey cross indicates missing data. Tagged accumulations, rainfall totals accumulated over multiple days, are shown with an empty circle and a cross. The final day in the accumulation period is coloured by the multiday total and the other days are coloured grey.</p>
+</section>
+<section id="quality-issues" class="level3">
+<h3 class="anchored" data-anchor-id="quality-issues">Quality Issues</h3>
+<p>On 26-01-1974 there was an extreme rainfall event in Brisbane, Australia, Figure XXXX. The majority of stations in this region recorded their annual maximum on this date. However, observations recorded at some stations are spatially inconsistent.</p>
+<p>One of the stations has missing data on 26-01-1974. This station is shown with a cross. Observations were recorded on the days prior and missing observations are recorded in the days directly after. This suggests that the reason the observation is missing may be related to the extreme event, such as the station washing away. This missing observation is therefore likely to be a missing maximum.</p>
+<p>Also on 26-01-1974 two observations are recorded as 0 mm. One of these was flagged as spatially inconsistent by the GHCN-Daily quality control. The other was not. These zeros are clearly spurious given the surrounding rainfall. The true observations are likely to have been annual maxima for these stations.</p>
+<p>There are also three tagged accumulations that cover 26-01-1974. The annual maximum for each of these stations is likely to have been recorded within the accumulation. Automatic identification of individual daily totals from an accumulation is challenging and we do not attempt it here.</p>
+<p>Within this example there are also suspected untagged accumulations. Untagged accumulations occur when multiple days of rainfall are recorded as a single day. These types of observations can present as spurious maxima. An example of an untagged accumulation is the annual maximum observation of 240.4 mm recorded on 28-01-1974. On the four days prior to 28-01-1974, 0 mm of rainfall was recorded at the station. However, this period of zero recorded rainfall includes an extreme rainfall event on the 26-01-1974. Additionally, on 28-01-1974 the five closest stations recorded approximately 50 mm of rainfall compared with 240.4 mm. Given the observations at the surrounding stations from 24-01-1974 to 28-01-1974, this observation is clearly spurious and should have been flagged for quality.</p>
+<p>Of the 27 stations in this example on 26-01-1974; we suspect that 3 maxima occurred within tagged accumulations, 1 station recorded missing data instead of a maximum and 2 observations were falsely recorded as zero instead of tagged accumulations. If the extremal observations are not treated appropriately during preprocessing, these observations will result in errors in the annual maximum observations. Whilst in general statistical methods will be robust to some errors within the data, care should be taken to identify as many systematic and prevalent sources of error as possible.</p>
 </section>
 </section>
 <section id="quality-control-issues" class="level2">

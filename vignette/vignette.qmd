@@ -4,15 +4,20 @@ format: html
 editor: visual
 ---
 
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(here)
+```
+
 ## Introduction
 
-Para 1 - Automated testing is important for large scale data handling of observations.
+Para 1 - Automated testing is important for large scale data handling of observations and analysis of extreme events.
 
 Para 2 - There are a suite of tests of available for quality assurance.
 
-Para 3 - These do not necessarily guarantee the quality of the extreme observations. Known issues persist in this data.
+Para 3 - These do not necessarily guarantee the quality of the extreme observations. Known issues persist in this data that impact the analysis of extremes.
 
-Para 4 - Here we provide methods and examples showing how to better assess the quality of the extremal observations.
+Para 4 - Here we provide methods and examples showing how to better assess the quality of the extreme rainfall observations.
 
 ## Data
 
@@ -60,10 +65,11 @@ QFLAG1     is the quality flag for the first day of the month.  There are fourte
 
 ### Visualisation
 
-```{r eval = FALSE}
+```{r eval = TRUE, echo = FALSE}
 
-fig_data_for_plot <- readRDS("data/example_1974.rds")
+fig_data_for_plot <- readRDS("../data/example_1974.rds")
 
+fct_shapes = c(1, 16, 4, 13)
 extreme_event_temporal_plot <- ggplot(fig_data_for_plot) +
   geom_point(aes(x = date, y = id,
                  col = prcp_combined, shape = prcp_type),
@@ -76,6 +82,7 @@ extreme_event_temporal_plot <- ggplot(fig_data_for_plot) +
   ggtitle("Rainfall Observations", "Brisbane, Australia January 1974") +
   theme_bw()
 
+extreme_event_temporal_plot
 ```
 
 Caption: Daily rainfall observations in Brisbane, Australia. Solid circles are coloured by the measured precipitation. Empty circles show zero observations.A grey cross indicates missing data. Tagged accumulations, rainfall totals accumulated over multiple days, are shown with an empty circle and a cross. The final day in the accumulation period is coloured by the multiday total and the other days are coloured grey.
