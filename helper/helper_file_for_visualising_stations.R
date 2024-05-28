@@ -82,7 +82,8 @@ fig_data_for_plot = fig_data |>
 
 ggplot(fig_data_for_plot) +
   geom_point(aes(x = longitude, y = latitude,
-                 col = prcp_combined, shape = prcp_type), size = 4) +
+                 col = prcp_combined, shape = prcp_type),
+             size = 4, stroke = 1.15) +
   scale_shape_manual(name = "Obs Type",
                      values = fct_shapes) +
   scale_color_distiller(name = "Prcp (mm)") +
@@ -97,7 +98,8 @@ ggplot(fig_data_for_plot) +
 
 ggplot(fig_data_for_plot) +
   geom_point(aes(x = date, y = id,
-                 col = prcp_combined, shape = prcp_type), size = 4) +
+                 col = prcp_combined, shape = prcp_type),
+             size = 4, stroke = 1.15) +
   scale_shape_manual(name = "Obs Type",
                      values = fct_shapes) +
   scale_color_distiller(name = "Prcp (mm)") +
@@ -105,7 +107,6 @@ ggplot(fig_data_for_plot) +
   ylab("Station Id") +
   ggtitle("Rainfall Observations", "Brisbane, Australia January 1974") +
   theme_bw()
-
 
 # To dos:
 # Reverse defualt colour scale ? scale_color_distiller(direction = -1)
