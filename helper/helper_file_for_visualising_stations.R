@@ -1,5 +1,6 @@
 library(tidyverse)
 library(RColorBrewer)
+library(rnoaa)
 
 # -----------------------------------------------------------------------
 # Variables
@@ -21,7 +22,7 @@ fct_shapes = c(1, 16, 4, 13)
 # Pull all station data for figure
 # -----------------------------------------------------------------------
 
-meta_data = readRDS("data/all_stations_meta.rda")
+meta_data = readRDS("data/aus_stations_meta.rds")
 
 fig_stations_meta <- meta_data |>
   filter(latitude > lat_low & latitude < lat_upp) |>
@@ -52,7 +53,7 @@ fig_data = fig_station_data_all |>
   mutate(prcp = as.numeric(prcp)/10,
          dapr = as.numeric(dapr),
          mdpr = as.numeric(mdpr)/10) |>
-  left_join(fig_stations)
+  left_join(meta_data |> filter(element == "PRCP"))
 
 # -----------------------------------------------------------------------
 # Create a new variable for the shape
@@ -109,8 +110,8 @@ extreme_event_temporal_plot <- ggplot(fig_data_for_plot) +
 
 extreme_event_temporal_plot
 
-file_path = paste("data/example_", year(extreme_date), ".rds", sep = "")
-saveRDS(fig_data_for_plot, file_path)
+fig_file_path = paste("data/example_", year(extreme_date), ".rds", sep = "")
+saveRDS(fig_data_for_plot, fig_file_path)
 
 # -----------------------------------------------------------------------
 # To dos:
