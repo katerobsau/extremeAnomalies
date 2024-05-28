@@ -52,5 +52,5 @@ monitors <- seq_stations$id
 time1 <- Sys.time()
 reduced_station_data <- meteo_pull_monitors(monitors = monitors,
                                             keep_flags =  TRUE,
-                                            var = "PRCP")
+                                            var = c("PRCP", "DAPR", "DWPR", "MDPR"))
 time2 <- Sys.time()
