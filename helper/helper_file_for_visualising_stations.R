@@ -1,10 +1,22 @@
 library(tidyverse)
 library(RColorBrewer)
 
-station_meta = fig_stations
-monitors <- fig_stations$id
+# -----------------------------------------------------------------------
+# Variables
+# -----------------------------------------------------------------------
+
+meta_data = seq_stations_meta
+# Must set this, currently in memory
+
+lat_upp = -27.4
+lat_low = -27.55
+long_low = 152.9
+long_upp = 153.1
+
 extreme_date = as_date("1974-01-26")
 date_radius = 4
+
+rainfall_vars = c("PRCP", "DAPR", "DWPR", "MDPR")
 fct_levels = c("No rain", "Rain", "Missing", "Accum")
 fct_shapes = c(1, 16, 4, 13)
 
@@ -12,9 +24,24 @@ fct_shapes = c(1, 16, 4, 13)
 # Pull all station data for figure
 # -----------------------------------------------------------------------
 
+# Reduced Figure Stations
+fig_stations_meta <- meta_data |>
+  filter(latitude > lat_low & latitude < lat_upp) |>
+  filter(longitude > long_low & longitude < long_upp)
+monitors <- fig_stations_meta$id
+
+# fig_station_plot <- ggplot()  +
+#   geom_point(data  = seq_stations_meta,
+#              aes(x= longitude,  y = latitude),
+#              shape = 21, size = 0.2) +
+#   geom_point(data =  fig_stations_meta,
+#              aes(x= longitude,  y = latitude),
+#              shape = 21, fill = "red") +
+#   coord_fixed()
+
 fig_station_data_all <- meteo_pull_monitors(monitors = monitors,
-                                            keep_flags =  TRUE,
-                                            var = c("PRCP", "DAPR", "DWPR", "MDPR"))
+                                        keep_flags =  TRUE,
+                                        var = rainfall_vars)
 
 # -----------------------------------------------------------------------
 # Filter station data to necessary subset
