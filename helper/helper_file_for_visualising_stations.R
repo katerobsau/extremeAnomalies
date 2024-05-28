@@ -18,11 +18,11 @@ rainfall_vars = c("PRCP", "DAPR", "DWPR", "MDPR")
 fct_levels = c("No rain", "Rain", "Missing", "Accum")
 fct_shapes = c(1, 16, 4, 13)
 
+meta_data = readRDS("data/aus_stations_meta.rds")
+
 # -----------------------------------------------------------------------
 # Pull all station data for figure
 # -----------------------------------------------------------------------
-
-meta_data = readRDS("data/aus_stations_meta.rds")
 
 fig_stations_meta <- meta_data |>
   filter(latitude > lat_low & latitude < lat_upp) |>
@@ -110,7 +110,7 @@ extreme_event_temporal_plot <- ggplot(fig_data_for_plot) +
 
 extreme_event_temporal_plot
 
-fig_file_path = paste("data/example_", year(extreme_date), ".rds", sep = "")
+fig_file_path = paste("data/fig_data", year(extreme_date), ".rds", sep = "")
 saveRDS(fig_data_for_plot, fig_file_path)
 
 # -----------------------------------------------------------------------
