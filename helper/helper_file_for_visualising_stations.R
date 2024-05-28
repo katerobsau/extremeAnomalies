@@ -69,10 +69,10 @@ fig_data_for_plot = fig_data |>
   mutate(prcp_type = ifelse(is.na(prcp_combined), 'Missing', prcp_type)) |>
   mutate(prcp_type = ifelse(dapr_noNA > 0, 'Accum', prcp_type)) |>
   mutate(prcp_type = factor(prcp_type, levels = fct_levels)) |>
-  select(longitude, latitude, prcp_combined, prcp_type, date, qflag_prcp)
+  select(id, longitude, latitude, prcp_combined, prcp_type, date, qflag_prcp)
 
 # -----------------------------------------------------------------------
-# Plot extreme rainfall event
+# Spatially plot extreme rainfall event
 # -----------------------------------------------------------------------
 
 # 4 - cross
@@ -88,8 +88,24 @@ ggplot(fig_data_for_plot) +
   scale_color_distiller(name = "Prcp (mm)") +
   facet_wrap(~ date) +
   xlab("Longitude") +
-  ylab("Latitue") +
+  ylab("Latitude") +
   ggtitle("Rainfall Observations", "Brisbane, Australia January 1974")
+
+# -----------------------------------------------------------------------
+# Temporally plot extreme rainfall event
+# -----------------------------------------------------------------------
+
+ggplot(fig_data_for_plot) +
+  geom_point(aes(x = date, y = id,
+                 col = prcp_combined, shape = prcp_type), size = 4) +
+  scale_shape_manual(name = "Obs Type",
+                     values = fct_shapes) +
+  scale_color_distiller(name = "Prcp (mm)") +
+  xlab("Date") +
+  ylab("Station Id") +
+  ggtitle("Rainfall Observations", "Brisbane, Australia January 1974") +
+  theme_bw()
+
 
 # To dos:
 # Reverse defualt colour scale ? scale_color_distiller(direction = -1)
