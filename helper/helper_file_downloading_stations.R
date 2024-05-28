@@ -10,6 +10,12 @@ east_coast_longitude = 150
 
 all_stations <- ghcnd_stations()
 
+# Australian stations
+aus_stations <- all_stations %>%
+  filter(element == "PRCP") %>%
+  filter(str_detect(id, aus_code)) %>%
+  filter(longitude > 0) # removes ocean
+
 # Southeast Queensland Stations
 seq_stations <- all_stations |>
   filter(element == "PRCP") |>
