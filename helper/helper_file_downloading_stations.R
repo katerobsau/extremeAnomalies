@@ -5,7 +5,10 @@ library(oz)
 aus_code  = "ASN"
 var = c("PRCP", "DAPR", "DWPR", "MDPR")
 
+if(!file.exists("data/all_stations_meta.rds")){
 all_stations_meta <- ghcnd_stations()
+  saveRDS(all_stations_meta, "data/all_stations_meta.rds")
+}
 
 # Australian stations
 aus_stations_meta <- all_stations_meta %>%
@@ -31,9 +34,12 @@ seq_station_plot <- ggplot()  +
 
 # Data download
 # ~12 minutes for 435 stations
-monitors <- seq_stations_meta$id
-time1 <- Sys.time()
-reduced_station_data <- meteo_pull_monitors(monitors = monitors,
+if(!file.exists("data/seq_stations_data.rds")){
+  monitors <- seq_stations_meta$id
+  time1 <- Sys.time()
+  reduced_station_data <- meteo_pull_monitors(monitors = monitors,
                                             keep_flags =  TRUE,
                                             var = c("PRCP", "DAPR", "DWPR", "MDPR"))
-time2 <- Sys.time()
+  saveRDS("data/all_stations_meta.rds")
+  time2 <- Sys.time()
+}

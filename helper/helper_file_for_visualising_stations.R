@@ -5,9 +5,6 @@ library(RColorBrewer)
 # Variables
 # -----------------------------------------------------------------------
 
-meta_data = seq_stations_meta
-# Must set this, currently in memory
-
 lat_upp = -27.4
 lat_low = -27.55
 long_low = 152.9
@@ -24,7 +21,8 @@ fct_shapes = c(1, 16, 4, 13)
 # Pull all station data for figure
 # -----------------------------------------------------------------------
 
-# Reduced Figure Stations
+meta_data = readRDS("data/all_stations_meta.rda")
+
 fig_stations_meta <- meta_data |>
   filter(latitude > lat_low & latitude < lat_upp) |>
   filter(longitude > long_low & longitude < long_upp)
@@ -69,6 +67,7 @@ fig_data_for_plot = fig_data |>
   mutate(prcp_type = ifelse(is.na(prcp_combined), 'Missing', prcp_type)) |>
   mutate(prcp_type = ifelse(dapr_noNA > 0, 'Accum', prcp_type)) |>
   mutate(prcp_type = factor(prcp_type, levels = fct_levels)) |>
+  mutate(qflag_prcp = as.factor(qflag_prcp)) |>
   select(id, longitude, latitude, prcp_combined, prcp_type, date, qflag_prcp)
 
 # -----------------------------------------------------------------------
@@ -86,7 +85,7 @@ ggplot(fig_data_for_plot) +
              size = 4, stroke = 1.15) +
   scale_shape_manual(name = "Obs Type",
                      values = fct_shapes) +
-  scale_color_distiller(name = "Prcp (mm)") +
+  scale_color_gradient(name = "Prcp (mm)", low = "skyblue", high = "navy") +
   facet_wrap(~ date) +
   xlab("Longitude") +
   ylab("Latitude") +
@@ -96,21 +95,30 @@ ggplot(fig_data_for_plot) +
 # Temporally plot extreme rainfall event
 # -----------------------------------------------------------------------
 
-ggplot(fig_data_for_plot) +
+extreme_event_temporal_plot <- ggplot(fig_data_for_plot) +
   geom_point(aes(x = date, y = id,
                  col = prcp_combined, shape = prcp_type),
              size = 4, stroke = 1.15) +
   scale_shape_manual(name = "Obs Type",
                      values = fct_shapes) +
-  scale_color_distiller(name = "Prcp (mm)") +
+  scale_color_gradient(name = "Prcp (mm)", low = "skyblue", high = "navy") +
   xlab("Date") +
   ylab("Station Id") +
   ggtitle("Rainfall Observations", "Brisbane, Australia January 1974") +
   theme_bw()
 
+extreme_event_temporal_plot
+
+file_path = paste("data/example_", year(extreme_date), ".rds", sep = "")
+saveRDS(fig_data_for_plot, file_path)
+
+# -----------------------------------------------------------------------
 # To dos:
-# Reverse defualt colour scale ? scale_color_distiller(direction = -1)
+# -----------------------------------------------------------------------
+
 # Fix ticks
+
+# Should ideally vis qflags as well
 
 # ggplot(fig_data_for_plot ) +
 #   geom_point(aes(x = longitude, y = latitude,
