@@ -113,7 +113,40 @@ Of the 27 stations in this example on 26-01-1974; we suspect that 3 maxima occur
 -   Provide suggested updated quality flag
 -   Depending on the issue, demonstrate the impact of this on a basic GEV analysis with and without the fix.
 
+<br><br>
+
 ### Outliers vs Extremes
+
+#### Problem
+- Current test assumes normality which is terrible for rainfall which is not normal
+- Led to lots of false outlier flags 
+- People should not filter their extreme data using these flags otherwise liable to remove true extrmes. 
+- cite the automated QC paper 
+
+### Examples ??? 
+
+- Venezuala example (classic) 
+- Don't have other examples in the data 
+- How many "O"'s aren't really "O"'s  - false positive rate 
+- Demonstrate this in the data somehow 
+
+### R Solution 
+- Don't filter the data by the "O" flag
+
+### Proposed Solution 
+- ??? if there is good coverage use spatial consistency checking / nearest neighbours ??? 
+- meta data or historical newspapers 
+- Need a better solution. 
+ 
+### Fit a GEV with and without obs to show impact 
+
+- Miralles and Davision trigger event paper
+
+<!-- nbr_subset = # vector of ids # -->
+<!-- min_num_nbrs = 4 -->
+<!-- extreme rainfall - rough rule 20 km  -->
+
+<br><br>
 
 ### Untagged Accumulations
 

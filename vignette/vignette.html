@@ -134,9 +134,52 @@ ul.task-list li input[type="checkbox"] {
 <li>Provide suggested updated quality flag</li>
 <li>Depending on the issue, demonstrate the impact of this on a basic GEV analysis with and without the fix.</li>
 </ul>
+<p><br><br></p>
 </section>
 <section id="outliers-vs-extremes" class="level3">
 <h3 class="anchored" data-anchor-id="outliers-vs-extremes">Outliers vs Extremes</h3>
+<section id="problem" class="level4">
+<h4 class="anchored" data-anchor-id="problem">Problem</h4>
+<ul>
+<li>Current test assumes normality which is terrible for rainfall which is not normal</li>
+<li>Led to lots of false outlier flags</li>
+<li>People should not filter their extreme data using these flags otherwise liable to remove true extrmes.</li>
+<li>cite the automated QC paper</li>
+</ul>
+</section>
+</section>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples ???</h3>
+<ul>
+<li>Venezuala example (classic)</li>
+<li>Don’t have other examples in the data</li>
+<li>How many “O”’s aren’t really “O”’s - false positive rate</li>
+<li>Demonstrate this in the data somehow</li>
+</ul>
+</section>
+<section id="r-solution" class="level3">
+<h3 class="anchored" data-anchor-id="r-solution">R Solution</h3>
+<ul>
+<li>Don’t filter the data by the “O” flag</li>
+</ul>
+</section>
+<section id="proposed-solution" class="level3">
+<h3 class="anchored" data-anchor-id="proposed-solution">Proposed Solution</h3>
+<ul>
+<li>??? if there is good coverage use spatial consistency checking / nearest neighbours ???</li>
+<li>meta data or historical newspapers</li>
+<li>Need a better solution.</li>
+</ul>
+</section>
+<section id="fit-a-gev-with-and-without-obs-to-show-impact" class="level3">
+<h3 class="anchored" data-anchor-id="fit-a-gev-with-and-without-obs-to-show-impact">Fit a GEV with and without obs to show impact</h3>
+<ul>
+<li>Miralles and Davision trigger event paper</li>
+</ul>
+<!-- nbr_subset = # vector of ids # -->
+<!-- min_num_nbrs = 4 -->
+<!-- extreme rainfall - rough rule 20 km  -->
+<p><br><br></p>
 </section>
 <section id="untagged-accumulations" class="level3">
 <h3 class="anchored" data-anchor-id="untagged-accumulations">Untagged Accumulations</h3>
