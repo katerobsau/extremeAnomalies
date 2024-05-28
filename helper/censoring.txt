@@ -1,0 +1,23 @@
+
+library(evd)
+fgev(oxford)
+
+# standard (uncensored)
+nllh <- function(par) -sum(dgev(oxford, loc=par[1], scale=par[2], shape=par[3], log = TRUE))
+optim(c(83,4,-0.2), nllh)
+
+# uncensored (type = 0) and right censored (with type = 1)
+type <- rep(c(0,1), length.out = length(oxford))
+nllh <- function(par) -sum(dgev(oxford[type==0], loc=par[1], scale=par[2], shape=par[3], log = TRUE)) - sum(log(pgev(oxford[type==1], loc=par[1], scale=par[2], shape=par[3], lower.tail = FALSE)))
+optim(c(83,4,-0.2), nllh)
+
+# uncensored (type = 0) and right censored (with type = 1) and left censored (with type = 2)
+type <- rep(c(0,1,2), length.out = length(oxford))
+nllh <- function(par) -sum(dgev(oxford[type==0], loc=par[1], scale=par[2], shape=par[3], log = TRUE)) - sum(log(pgev(oxford[type==1], loc=par[1], scale=par[2], shape=par[3], lower.tail = FALSE))) - sum(log(pgev(oxford[type==2], loc=par[1], scale=par[2], shape=par[3], lower.tail = TRUE)))
+optim(c(83,4,-0.2), nllh)
+
+# truncated, with support restricted to (a,b)
+a <- 70; b <- 100
+nllh <- function(par) -sum(dgev(oxford, loc=par[1], scale=par[2], shape=par[3], log = TRUE) - log(pgev(b, loc=par[1], scale=par[2], shape=par[3]) - pgev(a, loc=par[1], scale=par[2], shape=par[3])))
+optim(c(83,4,-0.2), nllh)
+
