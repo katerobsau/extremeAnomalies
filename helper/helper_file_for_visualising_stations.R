@@ -6,12 +6,16 @@ library(rnoaa)
 # Variables
 # -----------------------------------------------------------------------
 
-lat_upp = -27.4
-lat_low = -27.55
-long_low = 152.9
-long_upp = 153.1
+delta = 0.25
+stn_lat = -27.07
+stn_long = 153.10
 
-extreme_date = as_date("1974-01-26")
+lat_upp = stn_lat + delta #-27.4 - 1974 fig window
+lat_low = stn_lat - delta #-27.55
+long_low = stn_long - delta #152.9
+long_upp = stn_long + delta #153.1
+
+extreme_date = as_date("2009-05-20") #as_date("1965-07-20")
 date_radius = 4
 
 rainfall_vars = c("PRCP", "DAPR", "DWPR", "MDPR")

@@ -118,6 +118,7 @@ Of the 27 stations in this example on 26-01-1974; we suspect that 3 maxima occur
 ### Outliers vs Extremes
 
 #### Problem
+
 - Current test assumes normality which is terrible for rainfall which is not normal
 - Led to lots of false outlier flags 
 - People should not filter their extreme data using these flags otherwise liable to remove true extrmes. 
