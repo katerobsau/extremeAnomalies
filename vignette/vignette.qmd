@@ -43,7 +43,7 @@ These variables are as described in the [GHCN daily readme](https://www1.ncdc.no
 There are fourteen flags associated with automatic testing[@durre2010].
 
 | Quality Assurance Test       | Details                                                                        | Flag |
-|-----------------|--------------------------------------|-----------------|
+|------------------------------|--------------------------------------------------------------------------------|------|
 | NA                           | Did not fail any quality assurance check                                       | ""   |
 | Duplicate check              | Identifies duplicated observations                                             | "D"  |
 | Gap check                    | Identifies maximal differences between observations                            | "G"  |
@@ -126,8 +126,8 @@ We find that 37 of 60 of these observations would pass a spatial consistency che
 Example 1: Correct outlier flag.
 
 ```{r eg1, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
-extreme_date = as_date("1893-06-09")
-stn_id = "ASN00040059"
+extreme_date = as_date("1982-03-10")
+stn_id = "ASN00040500"
 stn_meta = meta_data |> 
   filter(id == stn_id)
 
@@ -151,8 +151,8 @@ eg1_outlier_plot
 Example 2: Incorrect outlier flag (spatial consistent observations).
 
 ```{r eg2, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
-extreme_date = as_date("1893-06-09")
-stn_id = "ASN00040059"
+extreme_date = as_date("2022-01-08")
+stn_id = "ASN00040144"
 stn_meta = meta_data |> 
   filter(id == stn_id)
 
@@ -176,8 +176,8 @@ eg2_outlier_plot
 Example 3: Incorrect outlier flag, but flagged spatial inconsistent.
 
 ```{r eg3, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
-extreme_date = as_date("1893-06-09")
-stn_id = "ASN00040059"
+extreme_date = as_date("2009-05-20")
+stn_id = "ASN00040969"
 stn_meta = meta_data |> 
   filter(id == stn_id)
 
