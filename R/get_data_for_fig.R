@@ -1,4 +1,4 @@
-get_data_for_fig <- function(extreme_date, data_radius = 4, delta = 0.2, stn_lat, stn_long, meta_data){
+get_data_for_fig <- function(extreme_date, date_radius = 4, delta = 0.2, stn_lat, stn_long, meta_data){
 
   lat_upp = stn_lat + delta #-27.4 - 1974 fig window
   lat_low = stn_lat - delta #-27.55
