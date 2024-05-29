@@ -42,6 +42,8 @@ extr_quantiles <- fig_station_data_all |>
 mean(extr_quantiles$q975)
 median(extr_quantiles$q975)
 
+# In the end decided on a high threshold somewhat manually
+
 extr_threshold = 1500
 
 extr_rf_obs = fig_station_data_all |>
@@ -53,13 +55,19 @@ dim(extr_rf_dates)
 
 ### Of these is there any missing data the occurred on that date
 missing_on_extr_days = fig_station_data_all |>
+  filter(is.na(dapr)) |>
   filter(date %in% extr_rf_dates$date) |>
   filter(is.na(prcp))
 
 missing_dates = missing_on_extr_days |> select(date) |> distinct()
+length(missing_dates)
 
-extreme_date = as_date("2011-01-10")
-stn_id = "ASN00040059"
+extreme_date = as_date("1974-01-26")
+stn_id = missing_on_extr_days |>
+  filter(date == extreme_date) |>
+  slice(1) |>
+  pull(id)
+
 stn_meta = meta_data |>
   filter(id == stn_id)
 
@@ -72,9 +80,9 @@ fig_data_for_plot <- get_data_for_fig(
 obs_month_str = month(extreme_date, label = TRUE, abbr = TRUE) |>
   as.character()
 
-eg2_outlier_plot <- create_temporal_plot(
+missingness_plot <- create_temporal_plot(
   fig_data_for_plot,
   city_country_str = stn_meta$name,
   month_year_str = paste(obs_month_str, year(extreme_date)))
 
-eg2_outlier_plot
+missingness_plot
