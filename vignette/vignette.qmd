@@ -217,6 +217,21 @@ Arguably, the autmatic outlier flag should be ignored without further investigat
 
 ### Untagged Accumulations
 
+Example 4: Sunday-Monday Untagged Accumulations
+```{r eg4, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+grouped <- readRDS("../data/sunmon_acc.rds")
+
+grouped %>%
+  ggplot() +
+  geom_col(aes(x = day, y = raindays)) +
+  facet_wrap(~ year) +
+  theme_bw() +
+  labs(x = "Day of the Week",
+       y = "Count of Rain Days")
+```
+
+
+
 ### Flagging systematic missingness
 
 ### Conclusions
