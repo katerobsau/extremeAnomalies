@@ -43,7 +43,7 @@ These variables are as described in the [GHCN daily readme](https://www1.ncdc.no
 There are fourteen flags associated with automatic testing[@durre2010].
 
 | Quality Assurance Test       | Details                                                                        | Flag |
-|------------------------------|--------------------------------------------------------------------------------|------|
+|---------------|--------------------------------------------|--------------|
 | NA                           | Did not fail any quality assurance check                                       | ""   |
 | Duplicate check              | Identifies duplicated observations                                             | "D"  |
 | Gap check                    | Identifies maximal differences between observations                            | "G"  |
@@ -204,7 +204,7 @@ The automated quality testing runs the test for outlier first. Flagging any obse
 
 Arguably, the autmatic outlier flag should be ignored without further investigation. At a minimum exploratory data visualisation for any record breaking observations.
 
--   meta data or historical newspapers
+-   Meta data or historical newspapers
 -   Need a better solution.
 
 ### Fit a GEV with and without obs to show impact
@@ -215,9 +215,20 @@ Arguably, the autmatic outlier flag should be ignored without further investigat
 -   How many "O"'s aren't really "O"'s - false positive rate
 -   Demonstrate this in the data somehow
 
-### Untagged Accumulations
+### Why it never rains on Sunday
 
+**Problem**
+
+In the 1970s the post offices in Australia changed their opening hours from everyday to weekdays. As a result, rainfall observations that occurred on the weekend were often falsely recorded as a single daily total on the Monday [@viney2004]. This creates the problem of large multi-day totals appearing like an extreme observation in the data. \
+\
+*Other reasons this can occur on extreme days historically are people not being able to get to the station to read the data*
+
+**Example within the Data**
+
+Rainfall observations are expected to occur with similarly frequency on all days of the week. This assumption can be examined using a `chisq.test` for the station as a whole, and for individual recording years. The following example shows how the distribution of rainfall changes on days of the week for each year, with 1977 showing clear evidence of untagged accumulations.\
+\
 Example 4: Sunday-Monday Untagged Accumulations
+
 ```{r eg4, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
 grouped <- readRDS("../data/sunmon_acc.rds")
 
@@ -230,9 +241,15 @@ grouped %>%
        y = "Count of Rain Days")
 ```
 
+-   Add in individual observations that are likely untagged
 
+-   Can look at how many zero to "big days" in the region to see whether it is likely these are untagged.
 
-### Flagging systematic missingness
+**Suggested Approach**
+
+This issue of untagged multiday accumulations is not new and a series of approaches have been suggested to identify problematic stations [@viney2004] [@king2012] and problematic observations[@saunders2017]. We extend those here in a more streamlined approach to identifying these problematic observations. \
+\
+*Write some more stuff*
 
 ### Conclusions
 
