@@ -1,0 +1,174 @@
+---
+title: "Quality Control for Rainfall Extremes"
+bibliography: references.bib
+author: Kate\newline Jarryd\newline Fin
+titlegraphic: bg-13.png
+titlecolor: white
+toc: false
+keep-tex: true
+format: 
+  presentation-beamer: 
+    include-in-header: 
+      text: \newcommand{\theHtable}{\thetable}
+editor: source
+---
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(here)
+library(rnoaa)
+
+source("../R/get_data_for_fig.R")
+source("../R/create_spatial_plot.R")
+source("../R/create_temporal_plot.R")
+
+meta_data <- readRDS("../data/aus_stations_meta.rds")
+fct_shapes = c(1, 16, 4, 13)
+```
+
+## Quality Control
+
+\begin{block}{Automated testing} 
+
+Important for large scale data handling of observations and analysis of extreme events
+
+\end{block}
+
+### Sequential checks
+
+- Identifies duplicated observations
+- Checks for abnormally large observations
+- Failed spatial consistency check
+- Failed temporal consistency check
+- Temperature too warm for snow
+
+and so on.
+
+## Issues
+
+### True extremes values dropped as outliers
+
+- First step in an analysis is commonly to filter the data to remove observations flagged as outlier, but
+- __Current outlier test__ assumes normality -- True extreme observations are being incorrectly flagged as outliers
+- People are removing true extreme values from their analysis.
+
+### Untagged Accumulations
+
+Rainfall observations on Sundays are recorded on Mondays
+
+## True extremes values are not outliers
+
+### Spatial consistency check
+
+Check if the observation of an "outlier" station is consistent with its neighbouring stations' observed values.
+
+### Southeast Queensland
+
+- $60$ observations were flagged as outliers and have sufficient neighbours for spatial consistency check
+- $37$ observations pass the spatial consistency check and should be extreme values and not outliers
+- Outlier test has a false-positive rate of $62\%$
+
+## Example 1: Correct outlier flag
+
+```{r eg1, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date = as_date("1982-03-10")
+stn_id = "ASN00040500"
+stn_meta = meta_data |> 
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date, 
+  stn_lat = stn_meta$latitude, 
+  stn_long = stn_meta$longitude, 
+  meta_data = meta_data)
+
+obs_month_str = month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg1_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))) + 
+  geom_point(aes(x = x, y = y), data = tibble(x = extreme_date, y = stn_id), 
+             shape = 1, colour = "red", size = 6) +
+  theme(plot.background = element_blank())
+
+eg1_outlier_plot
+```
+
+## Example 2: False outlier (spatially consistent)
+
+```{r eg2, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date = as_date("2022-01-08")
+stn_id = "ASN00040144"
+stn_meta = meta_data |> 
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date, 
+  stn_lat = stn_meta$latitude, 
+  stn_long = stn_meta$longitude, 
+  meta_data = meta_data)
+
+obs_month_str = month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg2_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))) + 
+  geom_point(aes(x = x, y = y), data = tibble(x = extreme_date, y = stn_id), 
+             shape = 1, colour = "red", size = 6) +
+  theme(plot.background = element_blank())
+
+eg2_outlier_plot
+```
+
+## Example 3: False outlier (spatially inconsistent)
+
+```{r eg3, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date = as_date("2009-05-20")
+stn_id = "ASN00040969"
+stn_meta = meta_data |> 
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date, 
+  stn_lat = stn_meta$latitude, 
+  stn_long = stn_meta$longitude, 
+  meta_data = meta_data)
+
+obs_month_str = month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg2_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))) + 
+  geom_point(aes(x = x, y = y), data = tibble(x = extreme_date, y = stn_id), 
+             shape = 1, colour = "red", size = 6) +
+  theme(plot.background = element_blank())
+
+eg2_outlier_plot
+```
+
+## Suggestion
+
+Where possible a spatial consistency check should be used, or
+
+\huge just don't remove outliers.
+
+## Sunday-Monday Untagged Accumulations
+
+```{r eg4, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+grouped <- readRDS("../data/sunmon_acc.rds")
+
+grouped %>%
+  ggplot() +
+  geom_col(aes(x = day, y = raindays)) +
+  facet_wrap(~ year) +
+  theme_bw() +
+  labs(x = "Day of the Week",
+       y = "Count of Rain Days") +
+  theme(plot.background = element_blank())
+```
