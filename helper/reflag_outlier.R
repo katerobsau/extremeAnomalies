@@ -3,60 +3,70 @@ library(tidyverse)
 library(oz)
 
 ## ---- data ----
-aus_code  = "ASN"
-min_years = 50
+aus_code <- "ASN"
+min_years <- 50
 # var = c("PRCP", "DAPR", "DWPR", "MDPR")
-var = c("PRCP")
-delta = 50
-east_coast_longitude = 150
+var <- c("PRCP")
+delta <- 50
+east_coast_longitude <- 150
 
 # all_stations <- ghcnd_stations()
 # qs::qsave(all_stations, "station_meta.qs")
 # if(FALSE) {
-  # Southeast Queensland Stations
-  seq_stations <- all_stations |>
-    filter(element == "PRCP") |>
-    filter(str_detect(id, aus_code)) |>
-    filter(latitude < -25 & latitude > -28.5) |>
-    filter(longitude > 151 & longitude < 153.6)
+# Southeast Queensland Stations
+seq_stations <- all_stations |>
+  filter(element == "PRCP") |>
+  filter(str_detect(id, aus_code)) |>
+  filter(latitude < -25 & latitude > -28.5) |>
+  filter(longitude > 151 & longitude < 153.6)
 
 
-  seq_station_plot <- ggplot()  +
-    geom_point(data  = seq_stations,
-               aes(x= longitude,  y = latitude),
-               shape = 21, size = 0.2) +
-    geom_point(data =  seq_stations,
-               aes(x= longitude,  y = latitude),
-               shape = 21, fill = "red") +
-    coord_fixed()
+seq_station_plot <- ggplot() +
+  geom_point(
+    data = seq_stations,
+    aes(x = longitude, y = latitude),
+    shape = 21, size = 0.2
+  ) +
+  geom_point(
+    data = seq_stations,
+    aes(x = longitude, y = latitude),
+    shape = 21, fill = "red"
+  ) +
+  coord_fixed()
 
-  # Reduced Figure Stations
-  fig_stations <- seq_stations |>
-    filter(latitude < -27.4 & latitude > -27.55) |>
-    filter(longitude > 152.9 & longitude < 153.1)
+# Reduced Figure Stations
+fig_stations <- seq_stations |>
+  filter(latitude < -27.4 & latitude > -27.55) |>
+  filter(longitude > 152.9 & longitude < 153.1)
 
-  fig_station_plot <- ggplot()  +
-    geom_point(data  = seq_stations,
-               aes(x= longitude,  y = latitude),
-               shape = 21, size = 0.2) +
-    geom_point(data =  fig_stations,
-               aes(x= longitude,  y = latitude),
-               shape = 21, fill = "red") +
-    coord_fixed()
+fig_station_plot <- ggplot() +
+  geom_point(
+    data = seq_stations,
+    aes(x = longitude, y = latitude),
+    shape = 21, size = 0.2
+  ) +
+  geom_point(
+    data = fig_stations,
+    aes(x = longitude, y = latitude),
+    shape = 21, fill = "red"
+  ) +
+  coord_fixed()
 
-  # Data download
-  # ~12 minutes for 435 stations
-  monitors <- seq_stations$id
-  time1 <- Sys.time()
-  reduced_station_data <- meteo_pull_monitors(monitors = monitors,
-                                              keep_flags =  TRUE,
-                                              var = "PRCP")
-  time2 <- Sys.time()
+# Data download
+# ~12 minutes for 435 stations
+monitors <- seq_stations$id
+time1 <- Sys.time()
+reduced_station_data <- meteo_pull_monitors(
+  monitors = monitors,
+  keep_flags = TRUE,
+  var = "PRCP"
+)
+time2 <- Sys.time()
 # }
 # reduced_station_data <- readRDS("reduced_data.rds")
 # qs::qsave(reduced_station_data, "reduced_station_data.qs")
-# reduced_station_data <- qs::qread("reduced_station_data.qs")
-# station_meta <- qs::qread("station_meta.qs")
+reduced_station_data <- qs::qread("reduced_station_data.qs")
+station_meta <- qs::qread("station_meta.qs")
 
 ## ---- inspect ----
 
@@ -82,27 +92,36 @@ df_nbr <- nbr_subset(df_prcp_outlier$id, station_loc, Inf)
 
 
 df_target_prcp <- df_nbr %>%
-  left_join(df_prcp_outlier, by = c("target" = "id"),
-            relationship = "many-to-many") %>%
+  left_join(df_prcp_outlier,
+    by = c("target" = "id"),
+    relationship = "many-to-many"
+  ) %>%
   rename(target_prcp = prcp)
 
 df_nbr_date <- distinct(df_target_prcp, neighbour, date)
 df_nbr_3day <- bind_rows(
   df_nbr_date,
-  mutate(df_nbr_date, date = date-1),
-  mutate(df_nbr_date, date = date+1)) %>%
+  mutate(df_nbr_date, date = date - 1),
+  mutate(df_nbr_date, date = date + 1)
+) %>%
   rename(nbr_date = date) %>%
   mutate(date = rep(df_nbr_date$date, 3)) %>%
-  left_join(df_prcp, by = c("neighbour" = "id",
-                            "nbr_date" = "date"),
-            relationship = "many-to-many") %>%
+  left_join(df_prcp,
+    by = c(
+      "neighbour" = "id",
+      "nbr_date" = "date"
+    ),
+    relationship = "many-to-many"
+  ) %>%
   arrange(neighbour, nbr_date) %>%
   select(!qflag_prcp)
 
 
 df_nbr_prcp <- df_target_prcp %>%
-  left_join(df_nbr_3day, by = c("neighbour", "date"),
-            relationship = "many-to-many")
+  left_join(df_nbr_3day,
+    by = c("neighbour", "date"),
+    relationship = "many-to-many"
+  )
 
 
 df_nbr_close_prcp <- df_nbr_prcp %>%
@@ -116,9 +135,11 @@ df_nbr_close_prcp <- df_nbr_prcp %>%
 ## Step 1: calculate minimum absolute target-neighbour difference (matnd)
 df_matnd <- df_nbr_close_prcp %>%
   group_by(target, date, target_prcp) %>%
-  summarise(min_nbr_prcp = min(prcp),
-            max_nbr_prcp = max(prcp),
-            .groups = "drop") %>%
+  summarise(
+    min_nbr_prcp = min(prcp),
+    max_nbr_prcp = max(prcp),
+    .groups = "drop"
+  ) %>%
   mutate(matnd = case_when(
     between(target_prcp, min_nbr_prcp, max_nbr_prcp) ~ 0,
     target_prcp > max_nbr_prcp ~ abs(target_prcp - max_nbr_prcp),
@@ -139,7 +160,9 @@ df_station <- bind_rows(
 
 ls_prcp_ref <- df_prcp %>%
   mutate(ref_date = `year<-`(date, 2024)) %>%
-  {`names<-`(split(., .$id), unique(.$id))}
+  {
+    `names<-`(split(., .$id), unique(.$id))
+  }
 
 df_percent_rank <- df_station %>%
   mutate(data = lapply(id, \(id) ls_prcp_ref[[id]])) %>%
@@ -149,26 +172,37 @@ df_percent_rank <- df_station %>%
     min_date <- ref_date - days(14)
     max_date <- ref_date + days(14)
     sample_prcp <- data %>%
-      filter(between(.data$ref_date, .env$min_date, .env$max_date),
-             .data$prcp != 0) %>%
+      filter(
+        between(.data$ref_date, .env$min_date, .env$max_date),
+        .data$prcp != 0
+      ) %>%
       pull(prcp)
-    if(length(sample_prcp)<20) perc <- NA
-    else perc <- ecdf(sample_prcp)(prcp) * 100
+    if (length(sample_prcp) < 20) {
+      perc <- NA
+    } else {
+      perc <- ecdf(sample_prcp)(prcp) * 100
+    }
     perc
   }, id, date, prcp, data, SIMPLIFY = TRUE)) %>%
   select(!c(data, prcp))
 
 df_matnd_perc <- df_nbr_close_prcp %>%
   select(!ends_with("prcp")) %>%
-  left_join(df_percent_rank, by = c("target" = "id",
-                                    "date" = "date")) %>%
+  left_join(df_percent_rank, by = c(
+    "target" = "id",
+    "date" = "date"
+  )) %>%
   rename(target_perc = perc) %>%
-  left_join(df_percent_rank, by = c("neighbour" = "id",
-                                    "nbr_date" = "date")) %>%
+  left_join(df_percent_rank, by = c(
+    "neighbour" = "id",
+    "nbr_date" = "date"
+  )) %>%
   group_by(target, date, target_perc) %>%
-  summarise(min_nbr_perc = min(perc),
-            max_nbr_perc = max(perc),
-            .groups = "drop") %>%
+  summarise(
+    min_nbr_perc = min(perc),
+    max_nbr_perc = max(perc),
+    .groups = "drop"
+  ) %>%
   mutate(matnd_perc = case_when(
     between(target_perc, min_nbr_perc, max_nbr_perc) ~ 0,
     target_perc > max_nbr_perc ~ abs(target_perc - max_nbr_perc),
@@ -181,8 +215,9 @@ df_reflag <- df_matnd_perc %>%
   left_join(select(df_matnd, target, date, matnd)) %>%
   mutate(thr = case_when(
     is.na(matnd_perc) ~ 269.24,
-    matnd_perc != 0 ~ -45.72*log(matnd_perc) +269.24,
-    matnd_perc == 0 ~ 269.24)) %>%
+    matnd_perc != 0 ~ -45.72 * log(matnd_perc) + 269.24,
+    matnd_perc == 0 ~ 269.24
+  )) %>%
   mutate(new_flag = case_when(
     matnd < thr ~ "Spatial consistent",
     TRUE ~ "O"
@@ -207,5 +242,5 @@ df_reflag %>%
   filter(first_year == 1750) %>%
   select(!c(date, prcp, qflag_prcp)) %>%
   left_join(df_prcp, by = c("target" = "id")) %>%
-  arrange(target,first_year, date)
+  arrange(target, first_year, date)
 ## ---- end ----
