@@ -134,11 +134,26 @@ l <- ava_stations$length
 
 Check if the observation of an "outlier" station is consistent with its neighbouring stations' observed values.
 
+
+
+
 ### Southeast Queensland
 
 - $60$ observations were flagged as outliers and have sufficient neighbours for spatial consistency check
 - $37$ observations pass the spatial consistency check and should be extreme values and not outliers
 - Outlier test has a false-positive rate of $62\%$
+
+## Spatial consistency check
+
+For a specific station at a specific day
+
+1. Find neighbouring stations within a 20 km radius with more than $3$ days observations around the day
+
+1. Calculate minimum absolute target-neighbour difference (matnd) and matnd for percentile (matnd_perc)
+
+1. Set the threshold as a linear function of the log matnd_perc
+
+1. If the matnd is smaller than the threshold, determine the station at the day in question is spatially consistent.
 
 ## Example 1: Correct outlier flag
 
