@@ -162,6 +162,36 @@ list(
   ),
 
 
+  # 4. untagged accumulation
+  tar_target(
+    dayofweek_count,
+    df_prcp_zero %>%
+      filter(extreme) %>%
+      count(id, dayofweek = wday(date, label = TRUE))
+  ),
+  tar_target(
+    test_result,
+    dayofweek_count %>%
+      group_by(id) %>%
+      mutate(expected = sum(n) / 7) %>%
+      summarise(test_stats = sum((n - expected)^2 / expected)) %>%
+      mutate(p_value = pchisq(test_stats, 6)) %>%
+      filter(p_value <= 0.05)
+  ),
+  tar_target(
+    df_prcp_tagaccu,
+    df_prcp_zero %>%
+      left_join(
+        test_result %>%
+          select(id) %>%
+          mutate(untagged_accumulation_station = TRUE),
+        by = "id"
+      ) %>%
+      replace_na(list(untagged_accumulation_station = FALSE)) %>%
+      mutate(flag_untagged_accumulated_extreme = extreme & untagged_accumulation_station)
+  ),
+
+
   # end
   tar_target(end, NULL)
 )

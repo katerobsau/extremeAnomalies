@@ -30,7 +30,7 @@ tar_config_set(store = "../_targets")
 ```
 
 ```{r}
-tar_load(df_prcp_zero)
+tar_load(df_prcp_tagaccu)
 tar_load(seq_stations)
 ```
 
@@ -261,13 +261,13 @@ The procedure is repeated for every station.
 #| cache: true
 id <- "ASN00040452"
 period <- c(ymd("1974-01-25"), ymd("1974-01-28"))
-tar_qplot(id, period = period, data = df_prcp_zero, n = 20)
+tar_qplot(id, period = period, data = df_prcp_tagaccu, n = 20)
 ```
 
 ## Extreme missings
 ```{r}
 
-df_extreme_missing <- filter(df_prcp_zero, flag_missing_extreme)
+df_extreme_missing <- filter(df_prcp_tagaccu, flag_missing_extreme)
 station_extreme_missing <- distinct(df_extreme_missing, id)
 ```
 
@@ -280,7 +280,7 @@ station_extreme_missing <- distinct(df_extreme_missing, id)
 ## Tagged accumulation
 
 ```{r}
-df_accumulated_extreme <- filter(df_prcp_zero, flag_accumulated_extreme)
+df_accumulated_extreme <- filter(df_prcp_tagaccu, flag_accumulated_extreme)
 station_accumulated_extreme <- distinct(df_accumulated_extreme, id)
 ```
 
@@ -298,7 +298,7 @@ Essentially the same as extreme missings with an additional accumulation tag.
 #| cache: true
 date <- ymd("2009-05-20")
 id <- "ASN00040774"
-tar_qplot(id, date = date, data = df_prcp_zero)
+tar_qplot(id, date = date, data = df_prcp_tagaccu)
 
 ```
 
@@ -324,19 +324,65 @@ grouped %>%
   theme(plot.background = element_blank())
 ```
 
+## Untagged accumulation
+
+### Identification
+
+Use Pearson's chi-squared test to check if each day of the week has equal probrobility of having extreme rainfall for a station.
 
 
+### Southeast Queensland
 
+```{r}
+tar_load(test_result)
+```
+
+```{r}
+df_untagged_accumulated_extreme <- filter(df_prcp_tagaccu, flag_untagged_accumulated_extreme)
+```
+
+- `r nrow(test_result)` stations are identified to contain possible untagged accumulations
+- `r nrow(df_untagged_accumulated_extreme)` observations are flagged as extreme values from stations containing possible untagged accumulations.
+
+## Untagged accumulation
+
+### Issues
+
+- The number of observation at each day of the week is not large enough to assume asymptotic properties of the test
+- All records of a suspicious statioin are flagged
+    - Good records (not untagged accumulation) are also flagged
+    - No way to identify each individual untagged accumulation
+- Not accurate
+
+
+```{r}
+#| cache: true
+#| eval: false
+date <- ymd("1922-12-19")
+id <- "ASN00039007"
+
+set.seed(3)
+x <- slice_sample(df_untagged_accumulated_extreme, n = 1)
+date <- x$date
+id <- x$id
+tar_qplot(id, date = date, data = df_prcp_tagaccu)
+
+
+df_prcp_tagaccu %>%
+  filter(.data$id == .env$id, .data$date == .env$date) %>%
+  glimpse()
+
+```
 
 ## Extreme zeros
 
 ```{r}
-df_extreme_zero <- filter(df_prcp_zero, flag_extreme_zero)
+df_extreme_zero <- filter(df_prcp_tagaccu, flag_extreme_zero)
 station_extreme_zero <- distinct(df_extreme_zero, id)
 ```
 
 ### Southeast Queensland
-- `r nrow(df_extreme_zero)` missing observations are flagged as extreme values
+- `r nrow(df_extreme_zero)` zero observations are flagged as extreme values
 - Ranging from `r min(df_extreme_zero$date)` to `r max(df_extreme_zero$date)`
 - From `r nrow(station_extreme_zero)` stations
 
@@ -356,7 +402,7 @@ df_extreme_zero %>%
   slice(eg_id) %>%
   {
     tar_qplot(.$id, .$date,
-      data = df_prcp_zero
+      data = df_prcp_tagaccu
     )
   }
 ```
@@ -373,7 +419,7 @@ df_extreme_zero %>%
   slice(eg_id) %>%
   {
     tar_qplot(.$id, .$date,
-      data = df_prcp_zero
+      data = df_prcp_tagaccu
     )
   }
 ```
