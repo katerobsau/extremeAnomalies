@@ -1,0 +1,381 @@
+---
+title: "Quality Control for Rainfall Extremes"
+author: Kate\newline Jarryd\newline Fin
+titlegraphic: bg-13.png
+titlecolor: white
+toc: false
+keep-tex: true
+format: 
+  presentation-beamer
+editor: source
+---
+
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(here)
+library(rnoaa)
+library(oz)
+library(geosphere)
+library(targets)
+library(scales)
+tar_source("../R")
+
+# source("../R/get_data_for_fig.R")
+# source("../R/create_spatial_plot.R")
+# source("../R/create_temporal_plot.R")
+
+meta_data <- readRDS("../data/aus_stations_meta.rds")
+fct_shapes <- c(1, 16, 4, 13)
+tar_config_set(store = "../_targets")
+```
+
+```{r}
+tar_load(df_prcp_zero)
+tar_load(seq_stations)
+```
+
+## Quality Control
+
+\begin{block}{Automated testing} 
+
+Important for large scale data handling of observations and analysis of extreme events
+
+\end{block}
+
+### Sequential checks
+
+- Identifies duplicated observations
+- Checks for abnormally large observations
+- Failed spatial consistency check
+- Failed temporal consistency check
+- Temperature too warm for snow
+
+and so on.
+
+## Southeast Queensland
+
+```{r}
+library(ozmaps)
+library(sf)
+```
+
+```{r}
+sf_oz <- ozmap_data("states")
+ggplot(data = sf_oz) +
+  annotate("rect", ymin = -28.5, ymax = -25, xmin = 151, xmax = 153.6, fill = "#ffa500") +
+  # geom_point(data = seq_stations, mapping = aes(x = longitude, y = latitude)) +
+  geom_sf(alpha = 0) +
+  coord_sf(default_crs = sf::st_crs(4326)) +
+  theme_void()
+```
+
+## Stations
+
+:::: {.columns}
+
+::: {.column width="40%" height = "100%"}
+
+
+```{r}
+#| fig-height: 11
+ggplot(data = sf_oz) +
+  # annotate("rect", ymin = -28.5, ymax = -25, xmin = 151, xmax = 153.6, fill = "#ffa500") +
+  geom_point(data = seq_stations, mapping = aes(x = longitude, y = latitude), alpha = 0.4) +
+  geom_sf(alpha = 0) +
+  coord_sf(default_crs = sf::st_crs(4326)) +
+  theme_void() +
+  lims(x = c(151, 153.6), y = c(-28.5, -25))
+```
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+ava_stations <- seq_stations %>%
+  mutate(length = last_year - first_year) %>%
+  select(id, length)
+l <- ava_stations$length
+
+```
+
+- `r nrow(seq_stations)` Stations
+- Avaiable data ranges from `r min(seq_stations$first_year)` to `r max(seq_stations$last_year)`
+- On average, `r round(mean(l))` years of data are available
+- `r percent(sum(l>270)/length(l))` of stations have more than $270$ years of data
+:::
+
+::::
+
+
+## Issues
+
+1. True extremes values dropped as outliers
+
+1. Extreme missings: Data are systematically missing because it is an extreme event
+
+1. Tagged accumulations: rainfalls are not recorded and accumulated to the next (next) day with a tag
+
+1. Untagged accumulations: rainfalls are not recorded and accumulated to the next without a tag
+
+1. Extreme Zeros: Data entries are $0$ when it is an extreme event
+
+## True extremes values dropped as outliers
+
+- First step in an analysis is commonly to filter the data to remove observations flagged as outlier, but
+- __Current outlier test__ assumes normality -- True extreme observations are being incorrectly flagged as outliers
+- People are removing true extreme values from their analysis.
+
+
+
+## True extremes values are not outliers
+
+### Spatial consistency check
+
+Check if the observation of an "outlier" station is consistent with its neighbouring stations' observed values.
+
+### Southeast Queensland
+
+- $60$ observations were flagged as outliers and have sufficient neighbours for spatial consistency check
+- $37$ observations pass the spatial consistency check and should be extreme values and not outliers
+- Outlier test has a false-positive rate of $62\%$
+
+## Example 1: Correct outlier flag
+
+```{r eg1, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date <- as_date("1982-03-10")
+stn_id <- "ASN00040500"
+stn_meta <- meta_data |>
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date,
+  stn_lat = stn_meta$latitude,
+  stn_long = stn_meta$longitude,
+  meta_data = meta_data
+)
+
+obs_month_str <- month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg1_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))
+) +
+  geom_point(aes(x = x, y = y),
+    data = tibble(x = extreme_date, y = stn_id),
+    shape = 1, colour = "red", size = 6
+  ) +
+  theme(plot.background = element_blank())
+
+eg1_outlier_plot
+```
+
+## Example 2: False outlier (spatially consistent)
+
+```{r eg2, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date <- as_date("2022-01-08")
+stn_id <- "ASN00040144"
+stn_meta <- meta_data |>
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date,
+  stn_lat = stn_meta$latitude,
+  stn_long = stn_meta$longitude,
+  meta_data = meta_data
+)
+
+obs_month_str <- month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg2_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))
+) +
+  geom_point(aes(x = x, y = y),
+    data = tibble(x = extreme_date, y = stn_id),
+    shape = 1, colour = "red", size = 6
+  ) +
+  theme(plot.background = element_blank())
+
+eg2_outlier_plot
+```
+
+## Example 3: False outlier (spatially inconsistent)
+
+```{r eg3, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+extreme_date <- as_date("2009-05-20")
+stn_id <- "ASN00040969"
+stn_meta <- meta_data |>
+  filter(id == stn_id)
+
+fig_data_for_plot <- get_data_for_fig(
+  extreme_date,
+  stn_lat = stn_meta$latitude,
+  stn_long = stn_meta$longitude,
+  meta_data = meta_data
+)
+
+obs_month_str <- month(extreme_date, label = TRUE, abbr = TRUE) |>
+  as.character()
+
+eg2_outlier_plot <- create_temporal_plot(
+  fig_data_for_plot,
+  city_country_str = stn_meta$name,
+  month_year_str = paste(obs_month_str, year(extreme_date))
+) +
+  geom_point(aes(x = x, y = y),
+    data = tibble(x = extreme_date, y = stn_id),
+    shape = 1, colour = "red", size = 6
+  ) +
+  theme(plot.background = element_blank())
+
+eg2_outlier_plot
+```
+
+## Solution
+
+Where possible a spatial consistency check should be used, or
+
+\huge just don't remove outliers.
+
+
+## Determine extreme values
+
+For a specific station
+
+1. Find neighbouring stations within a 20 km radius
+1. Take the $99$-th percentile of the daily rainfalls on rainy days of these neighbouring stations as the threshold
+1. On a particular day, if any station among those neighbouring stations has a rainfall record larger than the threshold, we determine that the centre station experiences extreme rainfall on this day
+
+The procedure is repeated for every station.
+
+
+
+## Extreme missings
+
+```{r}
+#| cache: true
+id <- "ASN00040452"
+period <- c(ymd("1974-01-25"), ymd("1974-01-28"))
+tar_qplot(id, period = period, data = df_prcp_zero, n = 20)
+```
+
+## Extreme missings
+```{r}
+
+df_extreme_missing <- filter(df_prcp_zero, flag_missing_extreme)
+station_extreme_missing <- distinct(df_extreme_missing, id)
+```
+
+### Southeast Queensland
+- `r nrow(df_extreme_missing)` missing observations are flagged as extreme values
+- Ranging from `r min(df_extreme_missing$date)` to `r max(df_extreme_missing$date)`
+- From `r nrow(station_extreme_missing)` stations
+
+
+## Tagged accumulation
+
+```{r}
+df_accumulated_extreme <- filter(df_prcp_zero, flag_accumulated_extreme)
+station_accumulated_extreme <- distinct(df_accumulated_extreme, id)
+```
+
+Essentially the same as extreme missings with an additional accumulation tag.
+
+
+### Southeast Queensland
+- `r nrow(df_accumulated_extreme)` missing observations are flagged as extreme values
+- Ranging from `r min(df_accumulated_extreme$date)` to `r max(df_accumulated_extreme$date)`
+- From `r nrow(station_accumulated_extreme)` stations
+
+## Tagged accumulation
+
+```{r}
+#| cache: true
+date <- ymd("2009-05-20")
+id <- "ASN00040774"
+tar_qplot(id, date = date, data = df_prcp_zero)
+
+```
+
+## Untagged accumulations
+
+Rainfall observations on Sundays are often recorded on Mondays without being noted by the observer in the records
+
+### Sunday-Monday untagged accumulations
+
+```{r eg4, cache = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+#| fig-height: 3
+grouped <- readRDS("../data/sunmon_acc.rds")
+
+grouped %>%
+  ggplot() +
+  geom_col(aes(x = day, y = raindays)) +
+  facet_wrap(~year) +
+  theme_bw() +
+  labs(
+    x = "Day of the Week",
+    y = "Count of Rain Days"
+  ) +
+  theme(plot.background = element_blank())
+```
+
+
+
+
+
+## Extreme zeros
+
+```{r}
+df_extreme_zero <- filter(df_prcp_zero, flag_extreme_zero)
+station_extreme_zero <- distinct(df_extreme_zero, id)
+```
+
+### Southeast Queensland
+- `r nrow(df_extreme_zero)` missing observations are flagged as extreme values
+- Ranging from `r min(df_extreme_zero$date)` to `r max(df_extreme_zero$date)`
+- From `r nrow(station_extreme_zero)` stations
+
+### Issues
+
+Usually combined with other problems, especially untagged accumulation, which makes it difficult to further categorise different types of extreme zeroes.
+
+## Extreme zeros with untagged accumulation
+
+The zero value that is identified as extreme value is silently accumulated to days later
+
+```{r}
+#| cache: true
+#| fig-height: 4
+eg_id <- 8
+df_extreme_zero %>%
+  slice(eg_id) %>%
+  {
+    tar_qplot(.$id, .$date,
+      data = df_prcp_zero
+    )
+  }
+```
+
+## Extreme zeros with untagged accumulation
+
+The zero value that is falsely identified as extreme value because of untagged accumulation in a neighbouring station
+
+```{r}
+#| cache: true
+#| fig-height: 4
+eg_id <- 20
+df_extreme_zero %>%
+  slice(eg_id) %>%
+  {
+    tar_qplot(.$id, .$date,
+      data = df_prcp_zero
+    )
+  }
+```
+
+

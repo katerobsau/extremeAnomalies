@@ -1,4 +1,6 @@
 *_cache
 *_files
 /beamerthemeMonash.sty
-/numbats_slides.tex
+/slides.tex
+
+/.quarto/
