@@ -102,7 +102,7 @@ l <- ava_stations$length
 - `r nrow(seq_stations)` Stations
 - Avaiable data ranges from `r min(seq_stations$first_year)` to `r max(seq_stations$last_year)`
 - On average, `r round(mean(l))` years of data are available
-- `r percent(sum(l>270)/length(l))` of stations have more than $270$ years of data
+- `r percent(sum(l>270)/length(l))` of stations have more than $270$ years inbetween their first and last observation
 :::
 
 ::::
